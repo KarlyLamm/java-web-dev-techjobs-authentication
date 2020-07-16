@@ -48,6 +48,7 @@ public class AuthenticationController {
     private static void setUserInSession(HttpSession session, User user) {
         session.setAttribute(userSessionKey, user.getId());
     }
+
     //registration form
     @GetMapping("/register")
     public String displayRegistrationForm(Model model) {
@@ -55,20 +56,21 @@ public class AuthenticationController {
         model.addAttribute("title", "Register");
         return "register";
     }
+
     //defines handler method at the route /register
     //takes a valid registerFormDTO object, associated errors, and a model
     @PostMapping("/register")
     public String processRegistrationForm(@ModelAttribute @Valid RegisterFormDTO registerFormDTO,
                                           Errors errors, HttpServletRequest request,
                                           Model model) {
-    //return the user to the form if a validation error
+        //return the user to the form if a validation error
         if (errors.hasErrors()) {
             model.addAttribute("title", "Register");
             return "register";
         }
-    //retrieves the user with the given username from the database
+        //retrieves the user with the given username from the database
         User existingUser = userRepository.findByUsername(registerFormDTO.getUsername());
-    //if a user w the given user already exists, register a custom error w the errors object and return user to form
+        //if a user w the given user already exists, register a custom error w the errors object and return user to form
         if (existingUser != null) {
             errors.rejectValue("username", "username.alreadyexists", "A user with that username already exists");
             model.addAttribute("title", "Register");
@@ -77,25 +79,20 @@ public class AuthenticationController {
 
         String password = registerFormDTO.getPassword();
         String verifyPassword = registerFormDTO.getVerifyPassword();
-       //compares passwords submitted
+        //compares passwords submitted
         if (!password.equals(verifyPassword)) {
             errors.rejectValue("password", "passwords.mismatch", "Passwords do not match");
             model.addAttribute("title", "Register");
             return "register";
         }
-    //creates new user object, store it in database, then create a new session for the user
+        //creates new user object, store it in database, then create a new session for the user
         User newUser = new User(registerFormDTO.getUsername(), registerFormDTO.getPassword());
         userRepository.save(newUser);
         setUserInSession(request.getSession(), newUser);
-    //takes user to homepage.... finally!
+        //takes user to homepage.... finally!
         return "redirect:";
     }
-    User newUser = new User(registerFormDTO.getUsername(), registerFormDTO.getPassword());
-        userRepository.save(newUser);
-    setUserInSession(request.getSession(), newUser);
 
-        return "redirect:";
-}
 // same steps repeated for login
 
     @GetMapping("/login")
@@ -145,7 +142,7 @@ public class AuthenticationController {
         request.getSession().invalidate();
         return"redirect:/login";
     }
-
-
 }
+
+
 
